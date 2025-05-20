@@ -1,34 +1,25 @@
 import { useState, useEffect } from 'react';
+import { BrowserRouter as Router, Routes, Route} from 'react-router-dom';
 import { Map } from './components/Map/Map';
-import { AdminPanel } from './components/Admin/AdminPanel';
 import { MapLayer } from './types/map';
 import { mockLayers } from './constants/mockData';
 import './App.css';
 
-function App() {
+function HistoricalMapPage() {
   const [layers, setLayers] = useState<MapLayer[]>([]);
   const [activeLayer, setActiveLayer] = useState<MapLayer | null>(null);
-  const [isAdmin] = useState(true); // В реальном приложении это должно быть основано на аутентификации
+  const [isAdmin] = useState(true);
 
   useEffect(() => {
-    // Используем моковые данные вместо API
     setLayers(mockLayers);
     if (mockLayers.length > 0) {
       setActiveLayer(mockLayers[0]);
     }
   }, []);
 
-  const handleLayerUpdate = (updatedLayer: MapLayer) => {
-    setLayers((prevLayers) =>
-      prevLayers.map((layer) => (layer.id === updatedLayer.id ? updatedLayer : layer))
-    );
-    if (activeLayer?.id === updatedLayer.id) {
-      setActiveLayer(updatedLayer);
-    }
-  };
 
   return (
-    <div className="app">
+    <div className="page">
       <div className="app-content">
         {activeLayer && (
           <Map
@@ -36,17 +27,60 @@ function App() {
             onPointClick={(point) => console.log('Point clicked:', point.name)}
             onRegionClick={(region) => console.log('Region clicked:', region.title)}
             isAdmin={isAdmin}
+            linkTo="Показатели"
+            link="/indicators"
           />
         )}
       </div>
-      {isAdmin && activeLayer && (
-        <div className="admin-panel-container">
-          <div className="admin-panel-trigger" />
-          <AdminPanel layer={activeLayer} onLayerUpdate={handleLayerUpdate} />
-        </div>
-      )}
+      
     </div>
   );
 }
 
-export default App
+function IndicatorsMapPage() {
+  const [layers, setLayers] = useState<MapLayer[]>([]);
+  const [activeLayer, setActiveLayer] = useState<MapLayer | null>(null);
+  const [isAdmin] = useState(true);
+
+  useEffect(() => {
+    setLayers(mockLayers);
+    if (mockLayers.length > 0) {
+      setActiveLayer(mockLayers[0]);
+    }
+  }, []);
+
+
+  return (
+    <div className="page">
+      <div className="app-content">
+        {activeLayer && (
+          <Map
+            layers={layers}
+            onPointClick={(point) => console.log('Point clicked:', point.name)}
+            onRegionClick={(region) => {
+              // Здесь будет логика отображения показателей региона
+              console.log('Region indicators:', region);
+            }}
+            isAdmin={isAdmin}
+            showIndicators={true}
+            linkTo="Историческая карта"
+            link="/"
+          />
+        )}
+      </div>
+    </div>
+  );
+}
+
+function App() {
+  return (
+    <Router>
+        <Routes>
+          <Route path="/" element={<HistoricalMapPage />} />
+          <Route path="/indicators" element={<IndicatorsMapPage />} />
+        </Routes>
+    </Router>
+  );
+}
+
+export default App;

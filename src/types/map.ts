@@ -23,6 +23,8 @@ export interface Region {
     excursions: number;
     partners: number;
     participants: number;
+    tourists: number;
+    revenue: number;
   };
   border: [number, number][];
   description?: string;
