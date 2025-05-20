@@ -1,10 +1,10 @@
 import React, { useMemo, useState } from 'react';
-import { MapContainer, Polygon, CircleMarker, Tooltip, useMap } from 'react-leaflet';
+import { MapContainer, Polygon, Tooltip, useMap } from 'react-leaflet';
 import { LatLngTuple, PathOptions } from 'leaflet';
-import { MapLayer, Point, Region } from '../../types/map';
+import { Region } from '../../types/map';
 import 'leaflet/dist/leaflet.css';
 import './Map.css';
-import { fourRegions } from '../../test/Four_regions_2_percents';
+import { fourRegions } from '../../constants/Four_regions_2_percents';
 import L from 'leaflet';
 import { Link } from 'react-router-dom';
 
@@ -29,26 +29,19 @@ function ZoomControls() {
 }
 
 interface MapProps {
-  layers: MapLayer[];
-  onPointClick?: (point: Point) => void;
   onRegionClick?: (region: Region) => void;
-  isAdmin?: boolean;
   showIndicators?: boolean;
   linkTo: string;
   link: string;
 }
 
-export const Map: React.FC<MapProps> = ({ 
-  layers, 
-  onPointClick, 
-  onRegionClick, 
-  isAdmin,
+export const Map: React.FC<MapProps> = ({
+  onRegionClick,
   showIndicators = false ,
   linkTo,
   link,
 }) => {
   const [showHistory, setShowHistory] = useState(false);
-  const activeLayer = layers.length > 0 ? layers[0] : null;
 
   // Преобразование координат для Leaflet
   const transformCoordinates = (coords: [number, number][]): LatLngTuple[] => {
@@ -82,10 +75,6 @@ export const Map: React.FC<MapProps> = ({
       transformedCoordinates: transformCoordinates(region.border)
     }));
   }, []);
-
-  if (!activeLayer) {
-    return <div>Нет доступных слоев карты</div>;
-  }
 
   const renderRegionTooltip = (region: Region) => {
     if (showIndicators) {
@@ -147,7 +136,7 @@ export const Map: React.FC<MapProps> = ({
         )}
       </div>
       {/* Метка админ */}
-      {isAdmin && <div className="gui-admin-label">админ</div>}
+      <div className="gui-admin-label">админ</div>
       {/* Сама карта */}
       <div className="map-container">
         <MapContainer
@@ -192,24 +181,6 @@ export const Map: React.FC<MapProps> = ({
             >
               <Tooltip sticky>{renderRegionTooltip(region)}</Tooltip>
             </Polygon>
-          ))}
-
-          {activeLayer.points.map((point) => (
-            <CircleMarker
-              key={point.id}
-              center={[point.coordinates[0], point.coordinates[1]]}
-              radius={3}
-              pathOptions={{
-                color: '#000000',
-                fillColor: '#000000',
-                fillOpacity: 1
-              }}
-              eventHandlers={{
-                click: () => onPointClick?.(point)
-              }}
-            >
-              <Tooltip>{point.name}</Tooltip>
-            </CircleMarker>
           ))}
         </MapContainer>
       </div>
