@@ -1,12 +1,12 @@
-import React, { useMemo, useState } from 'react';
+import React, { useMemo, useState, useEffect } from 'react';
 import { MapContainer, Polygon, Tooltip, useMap } from 'react-leaflet';
 import { LatLngTuple, PathOptions } from 'leaflet';
 import { Region } from '../../types/map';
 import 'leaflet/dist/leaflet.css';
 import './Map.css';
-import { fourRegions } from '../../constants/Four_regions_2_percents';
 import L from 'leaflet';
 import { Link } from 'react-router-dom';
+import { regions } from '../../api/regions';
 
 // Компонент для управления зумом
 function ZoomControls() {
@@ -35,23 +35,71 @@ interface MapProps {
   link: string;
 }
 
+// Разбивает полигон по антимеридиану
+function splitPolygonByAntimeridian(coords: [number, number][]): [number, number][][] {
+  if (coords.length === 0) return [];
+  const result: [number, number][][] = [];
+  let current: [number, number][] = [coords[0]];
+
+  for (let i = 1; i < coords.length; i++) {
+    const prev = coords[i - 1];
+    const curr = coords[i];
+    if (Math.abs(curr[1] - prev[1]) > 180) {
+      // Разрыв 
+      result.push(current);
+      current = [curr];
+    } else {
+      current.push(curr);
+    }
+  }
+  if (current.length) result.push(current);
+  return result;
+}
+
+// Модифицированная функция трансформации
+const transformCoordinates = (coords: [number, number][] | [number, number][][]): LatLngTuple[][] => {
+  // Функция для перевода отрицательных долгот в положительные
+  const toPositiveLng = (lng: number) => lng < 0 ? 360 + lng : lng;
+
+  // Если мультиполигон
+  if (Array.isArray(coords[0][0])) {
+    return (coords as [number, number][][]).flatMap(splitPolygonByAntimeridian).map(
+      polygon => polygon.map(([lat, lng]) => [lat, toPositiveLng(lng)] as LatLngTuple)
+    );
+  }
+  // Если один полигон
+  return splitPolygonByAntimeridian(coords as [number, number][]).map(
+    polygon => polygon.map(([lat, lng]) => [lat, toPositiveLng(lng)] as LatLngTuple)
+  );
+};
+
 export const Map: React.FC<MapProps> = ({
   onRegionClick,
-  showIndicators = false ,
+  showIndicators = false,
   linkTo,
   link,
 }) => {
   const [showHistory, setShowHistory] = useState(false);
+  const [regionsData, setRegionsData] = useState<Region[]>([]);
 
-  // Преобразование координат для Leaflet
-  const transformCoordinates = (coords: [number, number][]): LatLngTuple[] => {
-    return coords.map(([lat, lng]) => [lng, lat] as LatLngTuple);
-  };
+  useEffect(() => {
+    const fetchRegions = async () => {
+      try {
+        const data = await regions.getAllRegions();
+        setRegionsData(data.regions);
+      } catch (error) {
+        console.error('Ошибка при получении регионов:', error);
+      }
+    };
+
+    fetchRegions();
+  }, []);
 
   const defaultStyle: PathOptions = {
     color: '#000000',
+    fill: true,
     weight: 1,
-    fillOpacity: 0,
+    fillOpacity: 1,
     opacity: 1,
     fillColor: '#7A7A78',
     fillRule: 'evenodd',
@@ -59,22 +107,21 @@ export const Map: React.FC<MapProps> = ({
     lineJoin: 'round',
     dashArray: undefined,
     dashOffset: undefined,
-    fill: true
   };
 
   const hoverStyle: PathOptions = {
     ...defaultStyle,
-    weight: 2,
-    fillOpacity: 0.1,
-    opacity: 1
+    weight: 5,
+    fillOpacity: 0.5,
+    opacity: 1,
   };
 
-  const fourRegionsWithTransformedCoords = useMemo(() => {
-    return fourRegions.map(region => ({
+  const regionsWithTransformedCoords = useMemo(() => {
+    return regionsData.map(region => ({
       ...region,
       transformedCoordinates: transformCoordinates(region.border)
     }));
-  }, []);
+  }, [regionsData]);
 
   const renderRegionTooltip = (region: Region) => {
     if (showIndicators) {
@@ -123,12 +170,7 @@ export const Map: React.FC<MapProps> = ({
       )}
       {/* Легенда */}
       <div className="gui-legend">
-        {showIndicators ? (
-          <>
-            <div>Значок региона</div>
-            <div>Показатели региона</div>
-          </>
-        ) : (
+        {showIndicators ? null : (
           <>
             <div>Значок линии</div>
             <div>Историческая линия</div>
@@ -140,12 +182,12 @@ export const Map: React.FC<MapProps> = ({
       {/* Сама карта */}
       <div className="map-container">
         <MapContainer
-          center={[65, 70]}
-          zoom={5}
+          center={[65, 100]}
+          zoom={3.23}
           className="map-container"
           zoomControl={false}
           attributionControl={false}
-          maxBounds={[[35, 20], [85, 180]]}
+          maxBounds={[[35, 20], [85, 200]]}
           maxBoundsViscosity={1.0}
           minZoom={3.23}
           maxZoom={10}
@@ -159,29 +201,45 @@ export const Map: React.FC<MapProps> = ({
         >
           <ZoomControls />
           
-          {fourRegionsWithTransformedCoords.map((region) => (
-            <Polygon
-              key={region.id}
-              positions={region.transformedCoordinates}
-              pathOptions={defaultStyle}
-              eventHandlers={{
-                mouseover: (e) => {
-                  const layer = e.target;
-                  layer.setStyle(hoverStyle);
-                },
-                mouseout: (e) => {
-                  const layer = e.target;
-                  layer.setStyle(defaultStyle);
-                },
-                click: () => {
-                  console.log(`Clicked region: ${region.title}`);
-                  onRegionClick?.(region);
-                }
-              }}
-            >
-              <Tooltip sticky>{renderRegionTooltip(region)}</Tooltip>
-            </Polygon>
-          ))}
+          {regionsWithTransformedCoords.map((region) =>
+            region.transformedCoordinates.map((polygon, idx) => (
+              <Polygon
+                key={region.id + '-' + idx}
+                positions={polygon}
+                pathOptions={{
+                  ...defaultStyle,
+                  fillColor: region.color || defaultStyle.fillColor
+                }}
+                eventHandlers={{
+                  mouseover: (e) => {
+                    const layer = e.target;
+                    layer.setStyle({
+                      ...hoverStyle,
+                      fillColor: defaultStyle.fillColor,
+                    });
+                  },
+                  mouseout: (e) => {
+                    const layer = e.target;
+                    layer.setStyle({
+                      ...defaultStyle,
+                      fill: true,
+                      fillColor: region.color || defaultStyle.fillColor,
+                      fillOpacity: defaultStyle.fillOpacity,
+                      color: defaultStyle.color,
+                      weight: defaultStyle.weight,
+                      opacity: defaultStyle.opacity,
+                    });
+                  },
+                  click: () => {
+                    console.log(`Clicked region: ${region.title}`);
+                    onRegionClick?.(region);
+                  }
+                }}
+              >
+                <Tooltip sticky>{renderRegionTooltip(region)}</Tooltip>
+              </Polygon>
+            ))
+          )}
         </MapContainer>
       </div>
     </div>

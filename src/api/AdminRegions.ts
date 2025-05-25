@@ -7,9 +7,9 @@ export const adminRegions = {
         return response.data;
     },
 
-    addNewRegion: async (id: number, lineId: string|null = null) => {
+    addNewRegion: async (regionId: number, lineId: string|null = null) => {
         const response = await api.post('/api/admin/regions', {
-            id,
+            regionId,
             lineId
         });
         return response.data;

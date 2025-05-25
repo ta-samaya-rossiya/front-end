@@ -4,6 +4,7 @@
   background-color: #FFFFFF;
   overflow: hidden;
   user-select: none;
+  z-index: 1;
 }
 
 .map-content {
@@ -136,7 +137,7 @@
 }
 
 .leaflet-tooltip {
-  background-color: rgba(0, 0, 0, 0.8) !important;
+  background-color: #222 !important;
   border: 1px solid #FFFFFF !important;
   color: #FFFFFF !important;
   font-size: 12px;
@@ -165,13 +166,6 @@
   stroke-width: 1;
   stroke-linejoin: round;
   stroke-linecap: round;
-}
-
-/* Стили для регионов при наведении */
-.leaflet-pane .leaflet-overlay-pane svg path:hover {
-  stroke-width: 2;
-  stroke-opacity: 1;
-  fill-opacity: 0.1;
 }
 
 /* Стили для точек */
@@ -210,7 +204,7 @@
   left: 0;
   width: 100%;
   text-align: center;
-  z-index: 10;
+  z-index: 1001;
 }
 .gui-title {
   font-size: 2rem;
@@ -240,7 +234,7 @@
   font-size: 1rem;
   font-family: inherit;
   cursor: pointer;
-  z-index: 11;
+  z-index: 1001;
   box-shadow: 0 2px 8px rgba(0,0,0,0.08);
   transition: background 0.2s;
 }
@@ -298,7 +292,7 @@
   left: 0;
   top: 50%;
   transform: translateY(-50%);
-  z-index: 12;
+  z-index: 1001;
   display: flex;
   align-items: center;
   transition: left 0.3s;
@@ -339,7 +333,7 @@
   flex-direction: column;
   justify-content: flex-start;
   overflow-y: auto;
-  z-index: 12;
+  z-index: 1001;
 }
 .gui-history-arrow.open .gui-history-panel {
   opacity: 1;
@@ -374,7 +368,7 @@
   padding: 16px 24px 16px 16px;
   font-size: 0.95rem;
   min-width: 220px;
-  z-index: 10;
+  z-index: 1001;
   box-shadow: 0 2px 8px rgba(0,0,0,0.08);
 }
 
@@ -388,7 +382,7 @@
   background: #e0e0e0;
   border-radius: 4px;
   padding: 4px 12px;
-  z-index: 10;
+  z-index: 1001;
 }
 
 /* Контейнер для самой карты */
@@ -417,7 +411,7 @@
 .region-indicators h4 {
   margin: 0 0 8px 0;
   font-size: 14px;
-  color: #333;
+  color: #fff;
 }
 
 .indicators-list {
@@ -425,11 +419,16 @@
   flex-direction: column;
   gap: 4px;
   font-size: 12px;
-  color: #666;
+  color: #fff;
 }
 
 .indicators-list div {
   display: flex;
   justify-content: space-between;
   align-items: center;
+}
+
+.leaflet-interactive:focus {
+  outline: none !important;
+  box-shadow: none !important;
 } 
