@@ -170,7 +170,7 @@ export const Map: React.FC<MapProps> = ({
       )}
       {/* Легенда */}
       <div className="gui-legend">
-        {showIndicators ? null : (
+        {showIndicators ? null: (
           <>
             <div>Значок линии</div>
             <div>Историческая линия</div>
@@ -187,7 +187,7 @@ export const Map: React.FC<MapProps> = ({
           className="map-container"
           zoomControl={false}
           attributionControl={false}
-          maxBounds={[[35, 20], [85, 200]]}
+          maxBounds={[[25, 10], [85, 200]]}
           maxBoundsViscosity={1.0}
           minZoom={3.23}
           maxZoom={10}
