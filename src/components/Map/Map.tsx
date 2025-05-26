@@ -178,7 +178,7 @@ export const Map: React.FC<MapProps> = ({
         )}
       </div>
       {/* Метка админ */}
-      <div className="gui-admin-label">админ</div>
+      <Link to="/admin/historical-lines" className="gui-admin-label">Админ</Link>
       {/* Сама карта */}
       <div className="map-container">
         <MapContainer
