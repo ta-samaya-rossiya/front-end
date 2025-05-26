@@ -1,0 +1,53 @@
+.historical-lines-page {
+  padding: 20px;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.header h1 {
+  margin: 0;
+}
+
+.header-buttons button {
+  margin-left: 10px;
+}
+
+.selection-section {
+  margin-bottom: 20px;
+}
+
+.selection-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.historical-line-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  gap: 20px;
+}
+
+.historical-line-card {
+  border: 1px solid #ccc;
+  padding: 15px;
+  border-radius: 5px;
+  background-color: #f9f9f9;
+}
+
+.historical-line-card h3 {
+  margin-top: 0;
+}
+
+.historical-line-card .edit-icon {
+  float: right;
+  cursor: pointer;
+}
+
+/* Добавьте стили для других секций по мере их реализации */ 

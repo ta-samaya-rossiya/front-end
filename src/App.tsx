@@ -1,5 +1,6 @@
-import { BrowserRouter as Router, Routes, Route} from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom';
 import { Map } from './components/Map/Map';
+import HistoricalLinesPage from './components/HistoricalLinesPage/HistoricalLinesPage';
 import './App.css';
 
 function HistoricalMapPage() {
@@ -40,10 +41,18 @@ function IndicatorsMapPage() {
 function App() {
   return (
     <Router>
+      <div className="App">
+        {/* Временная ссылка для перехода на страницу администрирования */}
+        <div style={{ position: 'fixed', bottom: '20px', right: '20', zIndex: 1000 }}>
+          <Link to="/admin/historical-lines">Админ</Link>
+        </div>
+
         <Routes>
           <Route path="/" element={<HistoricalMapPage />} />
           <Route path="/indicators" element={<IndicatorsMapPage />} />
+          <Route path="/admin/historical-lines" element={<HistoricalLinesPage />} />
         </Routes>
+      </div>
     </Router>
   );
 }
