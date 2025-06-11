@@ -1,0 +1,54 @@
+.region-activation-wrapper {
+  background: transparent;
+  border-radius: 8px;
+  width: 100%;
+  max-width: 1100px;
+  margin: 0;
+  padding: 0;
+}
+
+.region-activation-title {
+  font-size: 1.18rem;
+  color: var(--text-color, #222);
+  font-weight: 700;
+  margin-bottom: 18px;
+  display: flex;
+  align-items: center;
+  gap: 18px;
+}
+
+.region-activation-save-btn {
+  background: var(--accent-color);
+  color: #fff;
+  border: none;
+  border-radius: 4px;
+  padding: 0;
+  width: 150px;
+  height: 30px;
+  align-items: center;
+  font-size: 1rem;
+  font-weight: 500;
+  margin-left: 12px;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.region-activation-save-btn:hover {
+  background: #2d1313;
+}
+
+.region-activation-map-container {
+  width: 1300px;
+  height: 720px;
+  background: #fff;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.04);
+}
+
+.region-activation-map-container .map-container {
+  width: 100% !important;
+  height: 100% !important;
+  min-height: 400px;
+  border-radius: 8px;
+} 

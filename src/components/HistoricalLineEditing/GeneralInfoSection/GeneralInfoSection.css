@@ -1,0 +1,126 @@
+.general-editing {
+    display: flex;
+    align-items: flex-start;
+}
+
+.general-info-section h3 {
+  margin-top: 0;
+  border-bottom: 1px solid var(--border-color);
+  padding-bottom: 10px;
+  margin-bottom: 20px;
+  font-size: 1.3em;
+  color: var(--accent-color);
+}
+
+.editing-header {
+  display: flex;
+  align-items: center;
+  margin-bottom: 30px;
+  margin-left: 20px;
+}
+
+.editing-header .action-buttons {
+  display: flex;
+  flex-direction: column;
+}
+
+.action-buttons button {
+  width: 200px;
+  height: 30px;
+  margin: auto 15px 20px auto;
+  padding: 0;
+  color: var(--black);
+  cursor: pointer;
+  border-radius: 4px;
+  transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+  font-size: 1.125rem;
+  border: 1px solid var(--black);
+  background-color: var(--white);
+}
+
+.action-buttons button.important-button {
+  background-color: var(--accent-color);
+  color: var(--white);
+  border-color: var(--accent-color);
+}
+
+.action-buttons button:hover {
+  background-color: var(--placeholder-bg);
+}
+
+.action-buttons button.important-button:hover {
+  background-color: var(--accent-color);
+}
+
+.editing-header button:hover {
+  background-color: var(--accent-color);
+}
+
+.editing-form {
+  background-color: var(--white);
+  box-shadow: 2px 2px 5px var(--card-shadow);
+  padding: 30px;
+}
+
+.editing-form label {
+  display: block;
+  margin-bottom: 20px;
+  font-weight: normal;
+  color: var(--black);
+  font-size: 1.125em;
+}
+
+.editing-form input[type="color"] {
+  margin-left: 10px;
+  width: 20px;
+  height: 20px;
+  padding: 0;
+  border: none;
+  background-color: transparent;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+  vertical-align: middle;
+}
+
+.editing-form input[type="color"]::-webkit-color-swatch-wrapper {
+  padding: 0;
+}
+
+.editing-form input[type="color"]::-webkit-color-swatch {
+  border: 1px solid var(--border-color);
+  border-radius: 2px;
+}
+
+.editing-form input[type="color"]::-moz-color-swatch {
+  border: 1px solid var(--border-color);
+  border-radius: 2px;
+}
+
+.editing-form input[type="text"],
+.editing-form select,
+.editing-form textarea {
+  padding: 10px;
+  border: 1px solid var(--border-color);
+  border-radius: 4px;
+  width: 100%;
+  box-sizing: border-box;
+  font-size: 1em;
+  color: var(--text-color);
+  background-color: var(--white);
+}
+
+.editing-form input[type="checkbox"] {
+  margin-right: 5px;
+  vertical-align: middle;
+  transform: scale(1.2);
+}
+
+.editing-form label input[type="checkbox"] {
+  font-weight: normal;
+}
+
+.editing-form textarea {
+  height: 120px;
+  resize: vertical;
+} 

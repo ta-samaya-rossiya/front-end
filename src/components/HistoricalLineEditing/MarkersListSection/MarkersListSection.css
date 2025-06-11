@@ -1,0 +1,18 @@
+.marker-preview {
+  width: 80px;
+  height: 80px;
+  background-color: var(--placeholder-bg);
+  border: 1px solid var(--border-color);
+  border-radius: 4px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-top: 10px;
+  cursor: pointer;
+}
+
+.marker-preview img {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+} 

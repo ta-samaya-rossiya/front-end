@@ -1,0 +1,37 @@
+.side-navigation {
+  position: absolute;
+  right: 100px;
+  top: 30vh;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  background-color: var(--white);
+  padding: 20px;
+  border-radius: 3px;
+}
+
+.side-navigation button {
+  padding: 0 10px;
+  border: 1px solid var(--border-color);
+  background-color: var(--black);
+  color: var(--white);
+  cursor: pointer;
+  border-radius: 4px;
+  text-align: center;
+  font-size: 1.1em;
+  transition: background-color 0.3s ease;
+  width: 250px;
+  height: 40px;
+}
+
+.side-navigation button.active {
+  background-color: var(--white);
+  font-weight: bold;
+  color: var(--text-color);
+  border-color: none;
+  box-shadow: 0px 0px 10px rgba(0, 0, 0, .5);
+}
+
+.side-navigation button:hover:not(.active) {
+  background-color: var(--button-bg-color);
+} 

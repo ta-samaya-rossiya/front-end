@@ -1,0 +1,67 @@
+.regions-list-section {
+  width: 490px;
+  padding: 20px;
+}
+
+.regions-list-section ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.regions-list-section li {
+  background: #fff;
+  border: 1px solid rgba(0, 0, 0, .1);
+  border-radius: 6px;
+  margin-bottom: 12px;
+  padding: 10px 16px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 1.13em;
+  color: var(--text-color);
+  font-weight: 500;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.03);
+  transition: box-shadow 0.2s, background 0.2s;
+}
+
+.regions-list-section li:last-child {
+  margin-bottom: 0;
+}
+
+.regions-list-section li:hover {
+  box-shadow: 0 2px 8px rgba(0,0,0,0.07);
+  background: #fafafa;
+}
+
+.regions-list-section li button {
+  margin-left: 10px;
+  border: none;
+  background-color: transparent;
+  cursor: pointer;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  transition: background 0.2s;
+}
+
+.regions-list-section li button:hover {
+  background: #f0f0f0;
+}
+
+.regions-list-section h3 {
+  font-size: 1.18rem;
+  font-weight: 700;
+  color: var(--text-color);
+  margin-bottom: 16px;
+  margin-top: 0;
+  border: none;
+  padding: 0;
+}
+
+.trash-icon {
+  display: inline-block;
+  vertical-align: middle;
+  margin-left: 8px;
+  cursor: pointer;
+} 

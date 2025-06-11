@@ -1,6 +1,7 @@
 import React, { useRef } from 'react';
-import { HistoricalLineCardData } from '../../types/historicalLines';
-import marker from '../../assets/marker_placeholder.png';
+import { HistoricalLineCardData } from '../../../types/historicalLines';
+import marker from '../../../assets/marker_placeholder.png';
+import './GeneralInfoSection.css';
 
 interface GeneralInfoSectionProps {
   selectedLine: HistoricalLineCardData | null;
@@ -50,7 +51,7 @@ const GeneralInfoSection: React.FC<GeneralInfoSectionProps> = ({
             <input
               type="text"
               name="name"
-              value={selectedLine?.name || ''}
+              value={selectedLine?.title || ''}
               onChange={handleInputChange}
             />
           </label>
@@ -60,7 +61,7 @@ const GeneralInfoSection: React.FC<GeneralInfoSectionProps> = ({
             <input
               type="color"
               name="color"
-              value={selectedLine?.color || '#000000'}
+              value={selectedLine?.lineColor || '#000000'}
               onChange={handleInputChange}
             />
           </label>
@@ -69,7 +70,7 @@ const GeneralInfoSection: React.FC<GeneralInfoSectionProps> = ({
             Стиль линии:
             <select
               name="style"
-              value={selectedLine?.style || ''}
+              value={selectedLine?.lineStyle || ''}
               onChange={handleInputChange}
             >
               {/* Пример опций. Замените на реальные стили при необходимости */}
@@ -84,7 +85,7 @@ const GeneralInfoSection: React.FC<GeneralInfoSectionProps> = ({
             <input
               type="text"
               name="legend"
-              value={selectedLine?.legend || ''}
+              value={selectedLine?.markerLegend || ''}
               onChange={handleInputChange}
             />
           </label>
@@ -92,7 +93,7 @@ const GeneralInfoSection: React.FC<GeneralInfoSectionProps> = ({
           <label>
             Маркер линии:
             <div className="marker-preview" onClick={handleMarkerClick}>
-              <img src={selectedLine?.marker || marker} alt="Маркер линии" />
+              <img src={selectedLine?.markerImage || marker} alt="Маркер линии" />
             </div>
             <input
               type="file"

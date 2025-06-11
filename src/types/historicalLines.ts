@@ -15,17 +15,47 @@ export interface HistoricalEventData {
   connections: [string, string][];
 }
 
+export interface ServerMarker {
+  id: string;
+  title: string;
+  coords: number[]; // assuming this is [lat, lon] or similar
+  order: number;
+}
+
+export interface ServerRegionDisplayTitle {
+  text: string;
+  position: number[]; // assuming this is [lat, lon] or similar
+  fontSize: number;
+}
+
+export interface ServerRegionInfo {
+  id: string;
+  title: string;
+  displayTitle: ServerRegionDisplayTitle;
+  color: string;
+}
+
 export interface HistoricalLineCardData {
   id: string;
-  name: string;
+  title: string;
+  markerImage?: string;
+  lineColor?: string;
+  lineStyle?: string;
+  markerLegend?: string;
   isActive: boolean;
-  color?: string;
-  style?: string;
-  legend?: string;
-  regions?: string[];
-  points?: PointData[];
-  historicalEvents?: HistoricalEventData[];
+  markers?: ServerMarker[];
+  addedRegions?: ServerRegionInfo[];
+  activeRegions?: ServerRegionInfo[];
   description?: string;
   videoLink?: string;
-  marker?: string;
+}
+
+export interface HistoricalObject {
+  id: string;
+  order: number;
+  title: string;
+  image?: string;
+  description: string;
+  videoUrl: string;
+  coords: number[];
 } 

@@ -1,4 +1,5 @@
 import React from 'react';
+import './SideNavigation.css';
 
 interface SideNavigationProps {
   activeSideSection: string;
@@ -15,7 +16,6 @@ const SideNavigation: React.FC<SideNavigationProps> = ({
     { name: 'regions', label: 'Регионы' },
     { name: 'cities', label: 'Города' },
     { name: 'markers', label: 'Маркеры' },
-    { name: 'events', label: 'События' },
   ];
 
   return (

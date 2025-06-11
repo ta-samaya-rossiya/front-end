@@ -1,5 +1,5 @@
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
-import { Map } from './components/Map/Map';
+import { Map } from './pages/Map/Map';
 import HistoricalLinesPage from './pages/HistoricalLinesPage/HistoricalLinesPage';
 import './App.css';
 

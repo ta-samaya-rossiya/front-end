@@ -14,17 +14,17 @@ const HistoricalLineCards: React.FC<HistoricalLineCardsProps> = ({ historicalLin
   return (
     <div className="historical-line-cards">
       {historicalLines
-        .filter(line => line.name.toLowerCase().includes(searchTerm.toLowerCase()))
+        .filter(line => line.title.toLowerCase().includes(searchTerm.toLowerCase()))
         .map(line => (
         <div key={line.id} className="historical-line-card">
           <h3>
-            {line.name}
+            {line.title}
             <img src={edit} alt='Редактировать' onClick={() => handleEditLine(line.id)} />
           </h3>
           <div className="card-content">
             <label>Маркер линии:</label>
             <div className="camera-placeholder">
-              <img src={line.marker ? line.marker : marker} alt="Маркер линии" />
+              <img src={line.markerImage ? line.markerImage : marker} alt="Маркер линии" />
             </div>
           </div>
           <div className="status">{line.isActive ? 'Активна' : 'Нективна'}</div>
