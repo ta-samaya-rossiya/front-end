@@ -1,37 +1,33 @@
+// adminRegions.ts
+// Этот файл содержит функции для взаимодействия с API административных операций над регионами.
 import { api } from "@/api/api";
 import { Region } from "@/types/map";
 
+// Вспомогательная функция для извлечения данных из ответа промиса
+const getData = (promise: Promise<any>) => promise.then(res => res.data);
+
 export const adminRegions = {
-    searchRegionOPM: async (name: string) => {
-        const response = await api.get<Region[]>(`/api/admin/regions/search?query=${name}`);
-        return response.data;
-    },
+    // Поиск регионов по названию в OPM
+    searchRegionOPM: (name: string) =>
+        getData(api.get<Region[]>(`/api/admin/regions/search?query=${name}`)),
 
-    addNewRegion: async (regionId: number, lineId: string|null = null) => {
-        const response = await api.post('/api/admin/regions', {
-            regionId,
-            lineId
-        });
-        return response.data;
-    },
+    // Добавление нового региона, опционально привязывая его к линии
+    addNewRegion: (regionId: number, lineId: string|null = null) =>
+        getData(api.post('/api/admin/regions', { regionId, lineId })),
 
-    putRegion: async (id: number, region: Region) => {
-        const response = await api.put(`/api/admin/regions/${id}`, region);
-        return response.data;
-    },
+    // Обновление существующего региона
+    putRegion: (id: number, region: Region) =>
+        getData(api.put(`/api/admin/regions/${id}`, region)),
 
-    deleteRegion: async (id: number) => {
-        const response = await api.delete(`/api/admin/regions/${id}`);
-        return response.data;
-    },
+    // Удаление региона по ID
+    deleteRegion: (id: number) =>
+        getData(api.delete(`/api/admin/regions/${id}`)),
 
-    postRegionImage: async (id: number, image: FormData) => {
-        const response = await api.post(`/api/admin/regions/${id}/image`, image);
-        return response.data;
-    },
+    // Загрузка изображения для региона
+    postRegionImage: (id: number, image: FormData) =>
+        getData(api.post(`/api/admin/regions/${id}/image`, image)),
 
-    deleteRegionImage: async (id: number) => {
-        const response = await api.delete(`/api/admin/regions/${id}/image`);
-        return response.data;
-    }
+    // Удаление изображения региона
+    deleteRegionImage: (id: number) =>
+        getData(api.delete(`/api/admin/regions/${id}/image`)),
 }

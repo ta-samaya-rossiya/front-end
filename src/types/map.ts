@@ -1,22 +1,30 @@
-export interface Region {
-  id: string;
-  title: string;
-  displayTitle: {
-    text: string;
-    position: [number, number];
-    fontSize: number;
+// map.ts
+// Этот файл содержит определения типов данных, связанных с географическими регионами и их отображением на карте.
+
+// Базовый интерфейс для информации о регионе, используемый для отображения
+export interface BaseRegionInfo {
+  id: string; // Уникальный идентификатор региона
+  title: string; // Название региона
+  displayTitle: { // Информация для отображения заголовка на карте
+    text: string; // Текст заголовка
+    position: [number, number]; // Позиция заголовка [широта, долгота]
+    fontSize: number; // Размер шрифта заголовка
   };
-  color: string;
-  isActive: boolean;
-  showIndicators: boolean;
-  indicators: {
-    coatOfArms: string;
-    excursions: number;
-    partners: number;
-    participants: number;
-    tourists: number;
-    revenue: number;
+  color: string; // Цвет региона на карте
+}
+
+// Интерфейс для полного региона, расширяющий BaseRegionInfo дополнительными данными
+export interface Region extends BaseRegionInfo {
+  isActive: boolean; // Флаг активности региона (например, для интерактивного выделения)
+  showIndicators: boolean; // Флаг для отображения индикаторов региона
+  indicators: { // Различные показатели, связанные с регионом
+    coatOfArms: string; // Герб региона (ссылка на изображение)
+    excursions: number; // Количество экскурсий
+    partners: number; // Количество партнеров
+    participants: number; // Количество участников
+    tourists: number; // Количество туристов
+    revenue: number; // Доход
   };
-  border: [number, number][];
-  description?: string;
+  border: [number, number][]; // Массив координат, определяющих границы региона (для отрисовки полигона)
+  description?: string; // Опциональное описание региона
 }

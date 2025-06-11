@@ -22,7 +22,7 @@ interface HistoricalLineEditingProps {
   handleCancelEdit: () => void;
   handleDeleteLine: () => void;
   handleMarkerChange: (file: File | null) => void;
-  handleAddRegion: (regionName: Region) => void;
+  handleAddRegion: (region: Region) => void;
   onUpdateActiveRegions: (activeRegionIds: string[]) => void;
 }
 
@@ -40,56 +40,58 @@ const HistoricalLineEditing: React.FC<HistoricalLineEditingProps> = ({
   handleAddRegion,
   onUpdateActiveRegions,
 }) => {
-  return <>
-    <div className="editing-section-container">
-        <div className="editing-side-section-content-container">
-          {activeSideSection === 'general' && (
-            <GeneralInfoSection
-              selectedLine={selectedLine}
-              handleInputChange={handleInputChange}
-              handleSaveLine={handleSaveLine}
-              handleCancelEdit={handleCancelEdit}
-              handleDeleteLine={handleDeleteLine}
-              handleCheckboxChange={handleCheckboxChange}
-              handleMarkerChange={handleMarkerChange}
-            />
-          )}
 
-          {activeSideSection === 'add-regions' && (
-            <div className="regions-editing-main">
-              <div className="regions-editing-header">
-                <span className="regions-editing-title">{selectedLine?.title || ''}</span>
-                <button className="regions-editing-save-btn" onClick={handleSaveLine}>Сохранить</button>
-              </div>
-              <div className="regions-editing-content">
-                <AddRegionsSection handleAddRegion={(region: Region) => handleAddRegion(region)} />
-                <RegionsListSection selectedLine={selectedLine} handleRemoveRegion={handleRemoveRegion} />
-              </div>
-            </div>
-          )}
-
-          {activeSideSection === 'regions' && (
-            <RegionActivation 
-              selectedLine={selectedLine}
-              onUpdateActiveRegions={onUpdateActiveRegions}
-            />
-          )}
-
-          {activeSideSection === 'cities' && (
-            <CitiesListSection lineId={selectedLine?.id || null} />
-          )}
-
-          {activeSideSection === 'markers' && (
-            <MarkersListSection />
-          )}
-
+  const sectionComponents: { [key: string]: React.ReactNode } = {
+    general: (
+      <GeneralInfoSection
+        selectedLine={selectedLine}
+        handleInputChange={handleInputChange}
+        handleSaveLine={handleSaveLine}
+        handleCancelEdit={handleCancelEdit}
+        handleDeleteLine={handleDeleteLine}
+        handleCheckboxChange={handleCheckboxChange}
+        handleMarkerChange={handleMarkerChange}
+      />
+    ),
+    'add-regions': (
+      <div className="regions-editing-main">
+        <div className="regions-editing-header">
+          <span className="regions-editing-title">{selectedLine?.title || ''}</span>
+          <button className="regions-editing-save-btn" onClick={handleSaveLine}>Сохранить</button>
         </div>
-    </div>
-    <SideNavigation
-          activeSideSection={activeSideSection}
-          setActiveSideSection={setActiveSideSection}
-        />
-  </>
+        <div className="regions-editing-content">
+          <AddRegionsSection handleAddRegion={handleAddRegion} />
+          <RegionsListSection selectedLine={selectedLine} handleRemoveRegion={handleRemoveRegion} />
+        </div>
+      </div>
+    ),
+    regions: (
+      <RegionActivation 
+        selectedLine={selectedLine}
+        onUpdateActiveRegions={onUpdateActiveRegions}
+      />
+    ),
+    cities: (
+      <CitiesListSection lineId={selectedLine?.id || null} />
+    ),
+    markers: (
+      <MarkersListSection />
+    ),
+  };
+
+  return (
+    <>
+      <div className="editing-section-container">
+        <div className="editing-side-section-content-container">
+          {sectionComponents[activeSideSection]}
+        </div>
+      </div>
+      <SideNavigation
+        activeSideSection={activeSideSection}
+        setActiveSideSection={setActiveSideSection}
+      />
+    </>
+  );
 };
 
 export default HistoricalLineEditing; 

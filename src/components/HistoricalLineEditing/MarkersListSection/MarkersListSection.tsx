@@ -1,3 +1,5 @@
+// MarkersListSection.tsx
+// Этот компонент предназначен для отображения списка маркеров, но в данный момент содержит только заглушку.
 import React from 'react';
 
 const MarkersListSection: React.FC = () => {

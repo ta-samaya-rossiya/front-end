@@ -25,14 +25,12 @@ const GeneralInfoSection: React.FC<GeneralInfoSectionProps> = ({
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleStatusButtonClick = () => {
-    // Симулируем объект события для handleCheckboxChange
-    const simulatedEvent = {
+    handleCheckboxChange({
       target: {
         name: 'isActive',
         checked: !selectedLine?.isActive,
       },
-    } as React.ChangeEvent<HTMLInputElement>;
-    handleCheckboxChange(simulatedEvent);
+    } as React.ChangeEvent<HTMLInputElement>);
   };
 
   const handleMarkerClick = () => {
@@ -51,7 +49,7 @@ const GeneralInfoSection: React.FC<GeneralInfoSectionProps> = ({
             <input
               type="text"
               name="name"
-              value={selectedLine?.title || ''}
+              value={selectedLine?.title}
               onChange={handleInputChange}
             />
           </label>
@@ -61,7 +59,7 @@ const GeneralInfoSection: React.FC<GeneralInfoSectionProps> = ({
             <input
               type="color"
               name="color"
-              value={selectedLine?.lineColor || '#000000'}
+              value={selectedLine?.lineColor}
               onChange={handleInputChange}
             />
           </label>
@@ -70,7 +68,7 @@ const GeneralInfoSection: React.FC<GeneralInfoSectionProps> = ({
             Стиль линии:
             <select
               name="style"
-              value={selectedLine?.lineStyle || ''}
+              value={selectedLine?.lineStyle}
               onChange={handleInputChange}
             >
               {/* Пример опций. Замените на реальные стили при необходимости */}
@@ -85,7 +83,7 @@ const GeneralInfoSection: React.FC<GeneralInfoSectionProps> = ({
             <input
               type="text"
               name="legend"
-              value={selectedLine?.markerLegend || ''}
+              value={selectedLine?.markerLegend}
               onChange={handleInputChange}
             />
           </label>
@@ -109,8 +107,7 @@ const GeneralInfoSection: React.FC<GeneralInfoSectionProps> = ({
             <div className='action-buttons'>
                 <button onClick={handleSaveLine} className='important-button'>Сохранить</button>
                 <button onClick={handleCancelEdit}>Отмена</button>
-                {selectedLine?.id !== undefined && selectedLine?.id !== null && 
-                <button onClick={handleDeleteLine} className='important-button'>Удалить</button>}
+                {selectedLine?.id && <button onClick={handleDeleteLine} className='important-button'>Удалить</button>}
                 <button
                 className={`status-button ${selectedLine?.isActive ? 'active' : ''}`}
                 onClick={handleStatusButtonClick}

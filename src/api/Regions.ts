@@ -1,43 +1,27 @@
+// regions.ts
+// Этот файл содержит функции для взаимодействия с общедоступным API регионов.
 import { api } from "@/api/api";
 
+const getData = (promise: Promise<any>) => promise.then(res => res.data);
+
 export const regions = {
-    getAllRegions: async (lineId: string|null = null) => {
-        if (lineId) {
-            const response = await api.get(`/api/regions?line_id=${lineId}`);
-            return response.data;
-        } else {
-            const response = await api.get('/api/regions');
-            return response.data;
-        }
-    },
+    // Получает все регионы, опционально фильтруя по ID линии
+    getAllRegions: (lineId: string|null = null) =>
+        getData(api.get(lineId ? `/api/regions?line_id=${lineId}` : '/api/regions')),
 
-    getBriefAllRegions: async (lineId: string|null = null) => {
-        if (lineId) {
-            const response = await api.get(`/api/regions/brief?line_id=84d1e0fa-9bfd-488d-95e1-59b58172c2bf`);
-            return response.data;
-        } else {
-            const response = await api.get('/api/regions/brief');
-            return response.data;
-        }
-    },
+    // Получает краткую информацию по всем регионам, опционально фильтруя по ID линии
+    getBriefAllRegions: (lineId: string|null = null) =>
+        getData(api.get(lineId ? `/api/regions/brief?line_id=${lineId}` : '/api/regions/brief')),
 
-    getRegionById: async (id: number, lineId: string|null = null) => {
-        if (lineId) {
-            const response = await api.get(`/api/regions/${id}?line_id=${lineId}`);
-            return response.data;
-        } else {
-            const response = await api.get(`/api/regions/${id}`);
-            return response.data;
-        }
-    },
+    // Получает информацию о регионе по его ID, опционально по ID линии
+    getRegionById: (id: number, lineId: string|null = null) =>
+        getData(api.get(lineId ? `/api/regions/${id}?line_id=${lineId}` : `/api/regions/${id}`)),
 
-    getRegionBorder: async (id: number) => {
-      const response = await api.get(`/api/regions/${id}/border`)
-      return response.data  
-    },
+    // Получает границы региона по ID
+    getRegionBorder: (id: number) =>
+        getData(api.get(`/api/regions/${id}/border`)),
 
-    getRegionIndicators: async (id: number) => {
-        const response = await api.get(`/api/regions/${id}/indicators`)
-        return response.data  
-      },
+    // Получает показатели региона по ID
+    getRegionIndicators: (id: number) =>
+        getData(api.get(`/api/regions/${id}/indicators`)),
 }

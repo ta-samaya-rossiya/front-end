@@ -13,8 +13,8 @@ const EventsListSection: React.FC<EventsListSectionProps> = ({
       <h3>События</h3>
       {historicalEvents && historicalEvents.length > 0 ? (
         <ul>
-          {historicalEvents.map((event, index) => (
-            <li key={index}>
+          {historicalEvents.map((event) => (
+            <li key={event.id}>
               {event.date}: {event.description}
             </li>
           ))}

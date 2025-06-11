@@ -1,3 +1,6 @@
+// HistoricalLinesPage.tsx
+// Этот компонент управляет отображением списка исторических линий, их созданием, редактированием и удалением.
+// Он также интегрирует логику работы с регионами и маркерами, связанными с линиями.
 import React, { useState, useEffect } from 'react';
 import './HistoricalLinesPage.css'; // Создадим позже файл стилей
 import HistoricalLineCards from '../../components/HistoricalLineCards/HistoricalLineCards'; // Импортируем новый компонент с правильным путем
@@ -6,14 +9,18 @@ import { HistoricalLineCardData, ServerRegionInfo } from '../../types/historical
 import { historicalLines } from '../../api/historicalLines';
 import { adminRegions } from '../../api/adminRegions';
 import { regions } from '../../api/regions';
-import { Region } from '../../types/map';
 
 const HistoricalLinesPage: React.FC = () => {
+  // Состояние для поискового запроса
   const [searchTerm, setSearchTerm] = useState('');
+  // Состояние для хранения списка исторических линий
   const [historicalLinesList, setHistoricalLinesList] = useState<HistoricalLineCardData[]>([]);
+  // Состояние для хранения выбранной исторической линии для редактирования
   const [selectedLine, setSelectedLine] = useState<HistoricalLineCardData | null>(null);
+  // Состояние для активной боковой секции редактирования
   const [activeSideSection, setActiveSideSection] = useState('general');
 
+  // Эффект для загрузки всех исторических линий при монтировании компонента
   useEffect(() => {
     const fetchHistoricalLines = async () => {
       try {
@@ -25,8 +32,9 @@ const HistoricalLinesPage: React.FC = () => {
     };
 
     fetchHistoricalLines();
-  }, []);
+  }, []); // Пустой массив зависимостей означает, что эффект запустится один раз при монтировании
 
+  // Обработчик для создания новой пустой линии
   const handleCreateLine = () => {
     // Создаем новую пустую линию для редактирования
     setSelectedLine({
@@ -36,7 +44,7 @@ const HistoricalLinesPage: React.FC = () => {
       lineColor: '#000000',
       lineStyle: 'solid',
       markerLegend: '',
-      markerImage: undefined,
+      markerImage: '', // Инициализируем пустой строкой
       markers: [],
       addedRegions: [],
       activeRegions: [],
@@ -45,11 +53,13 @@ const HistoricalLinesPage: React.FC = () => {
     });
   };
 
+  // Обработчик для перехода на страницу показателей (заглушка)
   const handleViewIndicators = () => {
     console.log('Перейти на страницу показателей');
     // Вероятно, использование react-router-dom для навигации
   };
 
+  // Обработчик для загрузки и редактирования существующей линии
   const handleEditLine = async (id: string) => {
     try {
       const lineToEdit = await historicalLines.getHistoricalLineById(id);
@@ -59,25 +69,16 @@ const HistoricalLinesPage: React.FC = () => {
     }
   };
 
+  // Обработчик сохранения изменений в линии (создание или обновление)
   const handleSaveLine = async () => {
     if (selectedLine) {
-      // Подготовка данных для отправки на сервер
-      const dataToSend = {
-        ...selectedLine,
-        markers: selectedLine.markers || [],
-        addedRegions: selectedLine.addedRegions || [],
-        activeRegions: selectedLine.activeRegions || [],
-        markerImage: selectedLine.markerImage || '',
-        lineColor: selectedLine.lineColor || '',
-        lineStyle: selectedLine.lineStyle || '',
-        markerLegend: selectedLine.markerLegend || '',
-        description: selectedLine.description || '',
-        videoLink: selectedLine.videoLink || '',
-      };
+      // Данные уже соответствуют HistoricalLineCardData благодаря useState и инициализации
+      const dataToSend = selectedLine;
 
       console.log('Данные, отправляемые на сервер:', JSON.stringify(dataToSend, null, 2));
 
-      const isNew = !historicalLinesList.find(line => line.id === selectedLine.id);
+      // Проверяем, является ли линия новой или существующей
+      const isNew = !historicalLinesList.some(line => line.id === selectedLine.id);
       if (isNew) {
         try {
           const created = await historicalLines.addHistoricalLine(dataToSend);
@@ -96,27 +97,30 @@ const HistoricalLinesPage: React.FC = () => {
           console.error('Ошибка при обновлении линии:', e);
         }
       }
-      setSelectedLine(null);
+      setSelectedLine(null); // Закрываем режим редактирования после сохранения
     }
   };
 
+  // Обработчик удаления линии
   const handleDeleteLine = async () => {
     if (selectedLine) {
       try {
         await historicalLines.deleteHistoricalLine(selectedLine.id);
         const updatedLines = historicalLinesList.filter(line => line.id !== selectedLine.id);
         setHistoricalLinesList(updatedLines);
-        setSelectedLine(null);
+        setSelectedLine(null); // Закрываем режим редактирования после удаления
       } catch (e) {
         console.error('Ошибка при удалении линии:', e);
       }
     }
   };
 
+  // Обработчик отмены редактирования
   const handleCancelEdit = () => {
-    setSelectedLine(null);
+    setSelectedLine(null); // Сбрасываем выбранную линию
   };
 
+  // Универсальный обработчик изменения полей ввода (input, textarea, select)
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
     // Маппинг для полей, которые изменили название
@@ -127,25 +131,26 @@ const HistoricalLinesPage: React.FC = () => {
     setSelectedLine(prev => (prev ? { ...prev, [newName]: value } : null));
   };
 
+  // Обработчик изменения состояния чекбокса
   const handleCheckboxChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, checked } = e.target;
     setSelectedLine(prev => (prev ? { ...prev, [name]: checked } : null));
   };
 
+  // Обработчик добавления региона к линии
   const handleAddRegion = async (region: { title: string; id: number }) => {
     if (selectedLine && selectedLine.id) {
       try {
         await adminRegions.addNewRegion(region.id, selectedLine.id);
+        const fullRegionInfo = await regions.getRegionById(region.id);
+
         const updatedLine = { ...selectedLine };
-        if (!updatedLine.addedRegions) {
-          updatedLine.addedRegions = [];
-        }
-        // Добавляем новый регион в формате ServerRegionInfo
+        
         const newRegionInfo: ServerRegionInfo = {
-          id: region.id.toString(), // Предполагаем, что id из adminRegions.searchRegionOPM подходит
-          title: region.title,
-          displayTitle: { text: region.title, position: [0, 0], fontSize: 12 }, // Заглушка
-          color: '#000000', // Заглушка
+          id: fullRegionInfo.id,
+          title: fullRegionInfo.title,
+          displayTitle: fullRegionInfo.displayTitle,
+          color: fullRegionInfo.color,
         };
 
         // Проверяем, что региона нет в списке, прежде чем добавить
@@ -159,6 +164,7 @@ const HistoricalLinesPage: React.FC = () => {
     }
   };
 
+  // Обработчик удаления региона из линии (локально)
   const handleRemoveRegion = async (regionName: string) => {
     if (selectedLine && selectedLine.id && selectedLine.addedRegions) {
       try {
@@ -172,9 +178,11 @@ const HistoricalLinesPage: React.FC = () => {
     }
   };
 
+  // Обработчик изменения изображения маркера линии
   const handleMarkerChange = async (file: File | null) => {
     console.log('Marker file selected:', file);
     if (selectedLine && file) {
+      // Если линия уже существует на сервере, загружаем маркер через API
       const isNew = !historicalLinesList.find(line => line.id === selectedLine.id);
       if (!isNew) {
         try {
@@ -184,6 +192,7 @@ const HistoricalLinesPage: React.FC = () => {
           console.error('Ошибка при загрузке маркера:', e);
         }
       } else {
+        // Для новой линии - локальный предпросмотр изображения
         const reader = new FileReader();
         reader.onloadend = () => {
           setSelectedLine(prev => prev ? { ...prev, markerImage: reader.result as string } : null); // Обновляем markerImage
@@ -191,38 +200,36 @@ const HistoricalLinesPage: React.FC = () => {
         reader.readAsDataURL(file);
       }
     } else if (selectedLine && file === null) {
+      // Если файл удален, сбрасываем markerImage
       setSelectedLine(prev => prev ? { ...prev, markerImage: undefined } : null); // Обновляем markerImage
     }
   };
 
+  // Обработчик обновления активных регионов для линии
   const handleUpdateActiveRegions = async (activeRegionIds: string[]) => {
     if (selectedLine) {
       const activeRegionsFullInfo: ServerRegionInfo[] = [];
       try {
-        const allRegionsResponse = await regions.getAllRegions(); // Returns { regions: Region[] }
-        const allAvailableRegions: Region[] = allRegionsResponse.regions; // Access the .regions property
+        // Получаем полную информацию для каждого активного региона
+        const regionPromises = activeRegionIds.map(id => regions.getRegionById(parseInt(id)));
+        const fetchedRegions = await Promise.allSettled(regionPromises);
 
-        activeRegionIds.forEach(id => {
-          const foundRegion = allAvailableRegions.find(r => r.id === id);
-          if (foundRegion) {
+        // Обрабатываем результаты запросов
+        fetchedRegions.forEach((result, index) => {
+          if (result.status === 'fulfilled' && result.value) {
+            const foundRegion = result.value;
             activeRegionsFullInfo.push({
               id: foundRegion.id,
               title: foundRegion.title,
               displayTitle: foundRegion.displayTitle,
               color: foundRegion.color,
             });
-          } else {
-            // Если регион не найден, добавляем заглушку
-            activeRegionsFullInfo.push({
-              id: id,
-              title: 'Unknown Region',
-              displayTitle: { text: 'Unknown', position: [0, 0], fontSize: 12 },
-              color: '#CCCCCC',
-            });
+          } else if (result.status === 'rejected') {
+            console.error(`Ошибка при получении информации для региона с ID ${activeRegionIds[index]}:`, result.reason);
           }
         });
         setSelectedLine(prev => prev ? { ...prev, activeRegions: activeRegionsFullInfo } : null);
-        // Сохраняем изменения после обновления активных регионов
+        // Сохраняем изменения на сервере после обновления активных регионов
         await handleSaveLine();
       } catch (error) {
         console.error('Ошибка при получении всех регионов для обновления активных регионов:', error);

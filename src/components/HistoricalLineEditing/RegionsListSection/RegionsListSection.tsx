@@ -15,12 +15,12 @@ const RegionsListSection: React.FC<RegionsListSectionProps> = ({
   return (
     <div className="regions-list-section">
       <h3>Регионы</h3>
-      {selectedLine?.addedRegions && selectedLine.addedRegions.length > 0 ? (
+      {selectedLine && selectedLine.addedRegions && selectedLine.addedRegions.length > 0 ? (
         <ul>
-          {selectedLine.addedRegions.map((region, index) => (
-            <li key={index}>
+          {selectedLine.addedRegions.map((region) => (
+            <li key={region.id}>
               {region.title}
-              <img onClick={() => handleRemoveRegion(region.title)}
+              <img onClick={() => handleRemoveRegion(region.id)}
               src={trashCanIcon} alt="Удалить" className="trash-icon" />
             </li>
           ))}

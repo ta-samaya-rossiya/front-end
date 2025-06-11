@@ -1,89 +1,64 @@
+// historicalLines.ts
+// Этот файл содержит функции для взаимодействия с API исторических линий и связанными с ними объектами и маркерами.
 import { api } from "@/api/api";
 import { HistoricalLineCardData, HistoricalObject } from "@/types/historicalLines";
 
+const jsonHeaders = { headers: { 'Content-Type': 'application/json' } };
+const getData = (promise: Promise<any>) => promise.then(res => res.data);
+
 export const historicalLines = {
-  // Добавление новой исторической линии
-  addHistoricalLine: async (data: Partial<HistoricalLineCardData>) => {
-    const response = await api.post('/api/admin/historical-lines', data, {
-      headers: { 'Content-Type': 'application/json' },
-    });
-    return response.data;
-  },
+  // Добавление новой исторической линии в систему
+  addHistoricalLine: (data: Partial<HistoricalLineCardData>) =>
+    getData(api.post('/api/admin/historical-lines', data, jsonHeaders)),
 
-  // Обновление исторической линии
-  updateHistoricalLine: async (lineId: string, data: Partial<HistoricalLineCardData>) => {
-    const response = await api.put(`/api/admin/historical-lines/${lineId}`, data, {
-      headers: { 'Content-Type': 'application/json' },
-    });
-    return response.data;
-  },
+  // Обновление существующей исторической линии по ее ID
+  updateHistoricalLine: (lineId: string, data: Partial<HistoricalLineCardData>) =>
+    getData(api.put(`/api/admin/historical-lines/${lineId}`, data, jsonHeaders)),
 
-  // Удаление исторической линии
-  deleteHistoricalLine: async (lineId: string) => {
-    const response = await api.delete(`/api/admin/historical-lines/${lineId}`);
-    return response.data;
-  },
+  // Удаление исторической линии по ее ID
+  deleteHistoricalLine: (lineId: string) =>
+    getData(api.delete(`/api/admin/historical-lines/${lineId}`)),
 
-  // Загрузка изображения маркера
-  uploadMarkerImage: async (lineId: string, file: File) => {
+  // Загрузка изображения маркера для исторической линии
+  uploadMarkerImage: (lineId: string, file: File) => {
     const formData = new FormData();
     formData.append('file', file);
-    const response = await api.post(`/api/admin/historical-lines/${lineId}/marker-image`, formData, {
+    return getData(api.post(`/api/admin/historical-lines/${lineId}/marker-image`, formData, {
       headers: { 'Content-Type': 'multipart/form-data' },
-    });
-    return response.data;
+    }));
   },
 
-  // Получить список объектов в линии
-  getObjects: async (lineId: string): Promise<{ objects: HistoricalObject[] }> => {
-    const response = await api.get(`/api/admin/historical-lines/${lineId}/objects`);
-    return response.data;
+  // Получение списка объектов (городов) для конкретной исторической линии
+  getObjects: (lineId: string): Promise<{ objects: HistoricalObject[] }> =>
+    getData(api.get(`/api/admin/historical-lines/${lineId}/objects`)),
+
+  // Добавление нового объекта (города) к исторической линии
+  addObject: (lineId: string, data: Partial<HistoricalObject>): Promise<HistoricalObject> =>
+    getData(api.post(`/api/admin/historical-lines/${lineId}/objects`, data, jsonHeaders)),
+
+  // Обновление существующего объекта (города) в исторической линии
+  updateObject: (lineId: string, objectId: string, data: Partial<HistoricalObject>): Promise<HistoricalObject> =>
+    getData(api.put(`/api/admin/historical-lines/${lineId}/objects/${objectId}`, data, jsonHeaders)),
+
+  // Удаление объекта (города) из исторической линии
+  deleteObject: (lineId: string, objectId: string): Promise<HistoricalObject> =>
+    getData(api.delete(`/api/admin/historical-lines/${lineId}/objects/${objectId}`)),
+
+  // Получение всех исторических линий в системе
+  getAllHistoricalLines: (): Promise<{ lines: HistoricalLineCardData[] }> =>
+    getData(api.get('/api/historical-lines')),
+
+  // Получение краткой информации по всем историческим линиям, опционально фильтруя по активности
+  getBriefHistoricalLines: (active?: boolean): Promise<{ lines: { id: string; title: string }[] }> => {
+    const params = active !== undefined ? { active } : {};
+    return getData(api.get('/api/historical-lines', { params }));
   },
 
-  // Добавить объект в линию
-  addObject: async (lineId: string, data: Partial<HistoricalObject>): Promise<HistoricalObject> => {
-    const response = await api.post(`/api/admin/historical-lines/${lineId}/objects`, data, {
-      headers: { 'Content-Type': 'application/json' },
-    });
-    return response.data;
-  },
+  // Получение полной информации об исторической линии по ее ID
+  getHistoricalLineById: (lineId: string): Promise<HistoricalLineCardData> =>
+    getData(api.get(`/api/historical-lines/${lineId}`)),
 
-  // Обновить объект
-  updateObject: async (lineId: string, objectId: string, data: Partial<HistoricalObject>): Promise<HistoricalObject> => {
-    const response = await api.put(`/api/admin/historical-lines/${lineId}/objects/${objectId}`, data, {
-      headers: { 'Content-Type': 'application/json' },
-    });
-    return response.data;
-  },
-
-  // Удалить объект
-  deleteObject: async (lineId: string, objectId: string): Promise<HistoricalObject> => {
-    const response = await api.delete(`/api/admin/historical-lines/${lineId}/objects/${objectId}`);
-    return response.data;
-  },
-
-  // Получить все исторические линии
-  getAllHistoricalLines: async (): Promise<{ lines: HistoricalLineCardData[] }> => {
-    const response = await api.get('/api/historical-lines');
-    return response.data;
-  },
-
-  // Получить краткую информацию по всем историческим линиям (с фильтром active)
-  getBriefHistoricalLines: async (active?: boolean): Promise<{ lines: { id: string; title: string }[] }> => {
-    const params = active !== undefined ? { active: active } : {};
-    const response = await api.get('/api/historical-lines', { params });
-    return response.data;
-  },
-
-  // Получить полную информацию по исторической линии по ID
-  getHistoricalLineById: async (lineId: string): Promise<HistoricalLineCardData> => {
-    const response = await api.get(`/api/historical-lines/${lineId}`);
-    return response.data;
-  },
-
-  // Получить полную информацию по исторической линии по ID объекта
-  getObjectById: async (objectId: string): Promise<HistoricalObject> => {
-    const response = await api.get(`/api/historical-lines/objects/${objectId}`);
-    return response.data;
-  },
+  // Получение полной информации об объекте (городе) по его ID
+  getObjectById: (objectId: string): Promise<HistoricalObject> =>
+    getData(api.get(`/api/historical-lines/objects/${objectId}`)),
 }; 

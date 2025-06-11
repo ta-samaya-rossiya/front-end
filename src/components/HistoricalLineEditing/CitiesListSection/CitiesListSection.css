@@ -68,6 +68,7 @@
   font-size: 0.95em;
   color: #444;
   align-items: center;
+  cursor: pointer;
 }
 
 .city-card-image-label img {

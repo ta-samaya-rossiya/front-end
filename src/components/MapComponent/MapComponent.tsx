@@ -1,3 +1,5 @@
+// MapComponent.tsx
+// Этот компонент отображает интерактивную карту с регионами, поддерживает управление зумом, отображение подсказок и обработку кликов по регионам.
 import React, { useMemo } from 'react';
 import { MapContainer, Polygon, Tooltip, useMap } from 'react-leaflet';
 import { LatLngTuple, PathOptions } from 'leaflet';
@@ -6,14 +8,16 @@ import 'leaflet/dist/leaflet.css';
 import './MapComponent.css';
 import L from 'leaflet';
 
-// Компонент для управления зумом
+// Компонент ZoomControls: управляет кнопками приближения/отдаления на карте.
 function ZoomControls() {
-  const map = useMap();
+  const map = useMap(); // Хук для доступа к экземпляру карты Leaflet
 
+  // Обработчик увеличения зума
   const handleZoomIn = () => {
     map.zoomIn();
   };
 
+  // Обработчик уменьшения зума
   const handleZoomOut = () => {
     map.zoomOut();
   };
@@ -26,13 +30,14 @@ function ZoomControls() {
   );
 }
 
+// Интерфейс для пропсов компонента MapComponent
 interface MapComponentProps {
-  regions: Region[];
-  onRegionClick?: (region: Region) => void;
-  showIndicators?: boolean;
+  regions: Region[]; // Массив данных о регионах для отображения на карте
+  onRegionClick?: (region: Region) => void; // Опциональный колбэк при клике на регион
+  showIndicators?: boolean; // Флаг для отображения индикаторов региона в подсказке
 }
 
-// Разбивает полигон по антимеридиану
+// Функция splitPolygonByAntimeridian: разбивает полигон на части, если он пересекает антимеридиан (180° долготы).
 function splitPolygonByAntimeridian(coords: [number, number][]): [number, number][][] {
   if (coords.length === 0) return [];
   const result: [number, number][][] = [];
@@ -41,29 +46,62 @@ function splitPolygonByAntimeridian(coords: [number, number][]): [number, number
   for (let i = 1; i < coords.length; i++) {
     const prev = coords[i - 1];
     const curr = coords[i];
+    // Если разница в долготе между соседними точками больше 180, значит, полигон пересекает антимеридиан
     if (Math.abs(curr[1] - prev[1]) > 180) {
-      result.push(current);
-      current = [curr];
+      result.push(current); // Завершаем текущий полигон
+      current = [curr]; // Начинаем новый полигон с текущей точки
     } else {
-      current.push(curr);
+      current.push(curr); // Добавляем точку к текущему полигону
     }
   }
-  if (current.length) result.push(current);
+  if (current.length) result.push(current); // Добавляем последний полигон
   return result;
 }
 
-// Функция трансформации координат
+// Функция transformCoordinates: преобразует координаты и разбивает полигоны.
 const transformCoordinates = (coords: [number, number][] | [number, number][][]): LatLngTuple[][] => {
+  // Вспомогательная функция для преобразования отрицательной долготы в положительную (0-360)
   const toPositiveLng = (lng: number) => lng < 0 ? 360 + lng : lng;
 
+  // Проверяем, является ли входной массив массивом массивов (мультиполигон)
   if (Array.isArray(coords[0][0])) {
-    return (coords as [number, number][][]).flatMap(splitPolygonByAntimeridian).map(
-      polygon => polygon.map(([lat, lng]) => [lat, toPositiveLng(lng)] as LatLngTuple)
-    );
+    return (coords as [number, number][][])
+      .flatMap(splitPolygonByAntimeridian) // Разбиваем каждый внутренний полигон
+      .map(
+        polygon => polygon.map(([lat, lng]) => [lat, toPositiveLng(lng)] as LatLngTuple) // Преобразуем координаты
+      );
   }
-  return splitPolygonByAntimeridian(coords as [number, number][]).map(
-    polygon => polygon.map(([lat, lng]) => [lat, toPositiveLng(lng)] as LatLngTuple)
-  );
+  // Если это одиночный полигон
+  return splitPolygonByAntimeridian(coords as [number, number][])
+    .map(
+      polygon => polygon.map(([lat, lng]) => [lat, toPositiveLng(lng)] as LatLngTuple) // Преобразуем координаты
+    );
+};
+
+// Определение стилей для полигонов регионов
+const defaultStyle: PathOptions = {
+  color: '#000000', // Цвет границы
+  fill: true, // Заливка полигона
+  weight: 1, // Толщина границы
+  fillOpacity: 1, // Прозрачность заливки
+  opacity: 1, // Прозрачность границы
+  fillColor: '#7A7A78', // Цвет заливки по умолчанию
+  fillRule: 'evenodd',
+  lineCap: 'round',
+  lineJoin: 'round',
+};
+
+const inactiveStyle: PathOptions = {
+  ...defaultStyle,
+  fillColor: '#CCCCCC', // Цвет заливки для неактивных регионов
+  fillOpacity: 0.7,
+};
+
+const hoverStyle: PathOptions = {
+  ...defaultStyle,
+  weight: 5, // Увеличенная толщина границы при наведении
+  fillOpacity: 0.5,
+  opacity: 1,
 };
 
 export const MapComponent: React.FC<MapComponentProps> = ({
@@ -71,40 +109,18 @@ export const MapComponent: React.FC<MapComponentProps> = ({
   onRegionClick,
   showIndicators = false,
 }) => {
-  const defaultStyle: PathOptions = {
-    color: '#000000',
-    fill: true,
-    weight: 1,
-    fillOpacity: 1,
-    opacity: 1,
-    fillColor: '#7A7A78',
-    fillRule: 'evenodd',
-    lineCap: 'round',
-    lineJoin: 'round',
-  };
-
-  const inactiveStyle: PathOptions = {
-    ...defaultStyle,
-    fillColor: '#CCCCCC',
-    fillOpacity: 0.7,
-  };
-
-  const hoverStyle: PathOptions = {
-    ...defaultStyle,
-    weight: 5,
-    fillOpacity: 0.5,
-    opacity: 1,
-  };
-
+  // Мемоизированные transformedCoordinates для предотвращения ненужных пересчетов
   const regionsWithTransformedCoords = useMemo(() => {
     return regions.map(region => ({
       ...region,
-      transformedCoordinates: transformCoordinates(region.border)
+      transformedCoordinates: transformCoordinates(region.border) // Преобразование координат границ региона
     }));
-  }, [regions]);
+  }, [regions]); // Зависимость от массива регионов
 
+  // Функция для рендеринга содержимого подсказки (Tooltip) для региона
   const renderRegionTooltip = (region: Region) => {
     if (showIndicators) {
+      // Если showIndicators true, отображаем подробные показатели
       return (
         <div className="region-indicators">
           <h4>{region.title}</h4>
@@ -116,60 +132,61 @@ export const MapComponent: React.FC<MapComponentProps> = ({
         </div>
       );
     }
+    // Иначе отображаем только название региона
     return region.title;
+  };
+
+  // Универсальный обработчик событий мыши для полигонов (mouseover, mouseout)
+  const handlePolygonEvent = (region: Region, isHover: boolean) => (e: any) => {
+    const layer = e.target; // Целевой слой Leaflet
+    // Определяем стиль в зависимости от состояния наведения и активности региона
+    const style = isHover ? hoverStyle : (region.isActive ? defaultStyle : inactiveStyle);
+    // Определяем цвет заливки
+    const fillColor = region.isActive ? (region.color || defaultStyle.fillColor) : inactiveStyle.fillColor;
+    layer.setStyle({ ...style, fillColor }); // Применяем стиль к слою
   };
 
   return (
     <div className="map-container">
       <MapContainer
-        center={[65, 100]}
-        zoom={3.23}
+        center={[65, 100]} // Начальный центр карты
+        zoom={3.23} // Начальный уровень зума
         className="map-container"
-        zoomControl={false}
-        attributionControl={false}
-        maxBounds={[[25, 10], [85, 200]]}
-        maxBoundsViscosity={1.0}
-        minZoom={3.23}
-        maxZoom={10}
-        crs={L.CRS.EPSG3857}
-        dragging={true}
-        keyboard={true}
-        bounceAtZoomLimits={true}
-        scrollWheelZoom={true}
-        doubleClickZoom={true}
-        touchZoom={true}
+        zoomControl={false} // Отключаем стандартный контроль зума
+        attributionControl={false} // Отключаем стандартный контроль атрибуции
+        maxBounds={[[25, 10], [85, 200]]} // Максимальные границы карты
+        maxBoundsViscosity={1.0} // Вязкость границ
+        minZoom={3.23} // Минимальный уровень зума
+        maxZoom={10} // Максимальный уровень зума
+        crs={L.CRS.EPSG3857} // Система координат
+        dragging={true} // Разрешить перетаскивание карты
+        keyboard={true} // Разрешить управление с клавиатуры
+        bounceAtZoomLimits={true} // Отскок при достижении лимитов зума
+        scrollWheelZoom={true} // Разрешить зум колесом мыши
+        doubleClickZoom={true} // Разрешить зум по двойному клику
+        touchZoom={true} // Разрешить сенсорный зум
       >
+        {/* Компонент управления зумом */}
         <ZoomControls />
         
+        {/* Рендеринг полигонов регионов */}
         {regionsWithTransformedCoords.map((region) =>
           region.transformedCoordinates.map((polygon, idx) => (
             <Polygon
-              key={region.id + '-' + idx}
-              positions={polygon}
+              key={region.id + '-' + idx} // Уникальный ключ для каждого полигона
+              positions={polygon} // Координаты полигона
               pathOptions={{
+                // Динамическое применение стилей в зависимости от активности региона
                 ...(region.isActive ? defaultStyle : inactiveStyle),
                 fillColor: region.isActive ? (region.color || defaultStyle.fillColor) : inactiveStyle.fillColor
               }}
               eventHandlers={{
-                mouseover: (e) => {
-                  const layer = e.target;
-                  layer.setStyle({
-                    ...hoverStyle,
-                    fillColor: region.isActive ? (region.color || defaultStyle.fillColor) : inactiveStyle.fillColor,
-                  });
-                },
-                mouseout: (e) => {
-                  const layer = e.target;
-                  layer.setStyle({
-                    ...(region.isActive ? defaultStyle : inactiveStyle),
-                    fillColor: region.isActive ? (region.color || defaultStyle.fillColor) : inactiveStyle.fillColor,
-                  });
-                },
-                click: () => {
-                  onRegionClick?.(region);
-                }
+                mouseover: handlePolygonEvent(region, true), // Обработчик наведения мыши
+                mouseout: handlePolygonEvent(region, false), // Обработчик ухода мыши
+                click: () => onRegionClick?.(region) // Обработчик клика на полигон
               }}
             >
+              {/* Подсказка (Tooltip) для региона */}
               <Tooltip sticky>{renderRegionTooltip(region)}</Tooltip>
             </Polygon>
           ))
@@ -177,4 +194,6 @@ export const MapComponent: React.FC<MapComponentProps> = ({
       </MapContainer>
     </div>
   );
-}; 
+};
+
+export default MapComponent; 
