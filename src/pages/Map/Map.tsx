@@ -65,7 +65,7 @@ export const Map: React.FC<MapProps> = ({
       {/* Заголовок страницы */}
       <div className="gui-header">
         <span className="gui-title">
-          {showIndicators ? 'Карта показателей' : 'Историческая карта'} // Динамический заголовок
+          {showIndicators ? 'Карта показателей' : 'Историческая карта'}
         </span>
         <div className="gui-header-underline" />
       </div>
