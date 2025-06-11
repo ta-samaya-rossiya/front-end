@@ -137,7 +137,7 @@ export const MapComponent: React.FC<MapComponentProps> = ({
   };
 
   // Универсальный обработчик событий мыши для полигонов (mouseover, mouseout)
-  const handlePolygonEvent = (region: Region, isHover: boolean) => (e: any) => {
+  const handlePolygonEvent = (region: Region, isHover: boolean) => (e: L.LeafletMouseEvent) => {
     const layer = e.target; // Целевой слой Leaflet
     // Определяем стиль в зависимости от состояния наведения и активности региона
     const style = isHover ? hoverStyle : (region.isActive ? defaultStyle : inactiveStyle);
