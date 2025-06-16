@@ -1,6 +1,6 @@
 // historicalLines.ts
 // Этот файл содержит определения типов данных для исторических линий, объектов, событий и связанных с ними элементов.
-import { BaseRegionInfo } from "./map";
+import { BaseRegionInfo, Region } from "./map";
 
 // Интерфейс для данных точки на карте (город или регион)
 export interface PointData {
@@ -23,10 +23,12 @@ export interface HistoricalEventData {
 
 // Интерфейс для данных маркера, используемого на линии
 export interface ServerMarker {
-  id: string; // ID маркера
-  title: string; // Заголовок маркера
-  coords: [number, number]; // Координаты маркера [широта, долгота]
-  order: number; // Порядок отображения маркера
+  id: string;
+  title: string;
+  coords: [number, number];
+  order: number;
+  description: string;
+  videoUrl: string;
 }
 
 // Интерфейс для информации о отображении заголовка региона
@@ -53,7 +55,7 @@ export interface HistoricalLineCardData {
   isActive: boolean; // Флаг активности линии
   markers: ServerMarker[]; // Массив маркеров, связанных с линией
   addedRegions: ServerRegionInfo[]; // Массив регионов, добавленных к линии
-  activeRegions: ServerRegionInfo[]; // Массив активных регионов для линии
+  activeRegions: Region[]; // Изменяем тип на Region[]
   description?: string; // Опциональное описание линии
   videoLink?: string; // Опциональная ссылка на видео
 }

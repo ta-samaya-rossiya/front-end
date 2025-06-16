@@ -23,7 +23,6 @@
 - React + TypeScript
 - Vite
 - Leaflet для работы с картами
-- Material-UI для интерфейса
 - Redux Toolkit для управления состоянием
 - Axios для работы с API
 
@@ -44,29 +43,3 @@ npm run dev
 npm run build
 ```
 
-## Структура проекта
-
-```
-src/
-  ├── components/
-  │   ├── Map/
-  │   ├── Admin/
-  │   └── HistoricalTimeline/
-  ├── services/
-  │   └── api.ts
-  ├── types/
-  │   └── map.ts
-  ├── constants/
-  │   └── countries.ts
-  ├── styles/
-  │   └── global.css
-  └── App.tsx
-```
-
-## API
-
-Подробная документация по API доступна в файле [API.md](API.md).
-
-## Лицензия
-
-MIT

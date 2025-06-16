@@ -2,14 +2,13 @@
 // Этот файл содержит функции для взаимодействия с API исторических линий и связанными с ними объектами и маркерами.
 import { api } from "@/api/api";
 import { HistoricalLineCardData, HistoricalObject } from "@/types/historicalLines";
-
 const jsonHeaders = { headers: { 'Content-Type': 'application/json' } };
-const getData = (promise: Promise<any>) => promise.then(res => res.data);
+const getData = <T>(promise: Promise<{ data: T }>) => promise.then(res => res.data);
 
 export const historicalLines = {
   // Добавление новой исторической линии в систему
-  addHistoricalLine: (data: Partial<HistoricalLineCardData>) =>
-    getData(api.post('/api/admin/historical-lines', data, jsonHeaders)),
+  addHistoricalLine: () =>
+    getData(api.post('/api/admin/historical-lines', jsonHeaders)),
 
   // Обновление существующей исторической линии по ее ID
   updateHistoricalLine: (lineId: string, data: Partial<HistoricalLineCardData>) =>

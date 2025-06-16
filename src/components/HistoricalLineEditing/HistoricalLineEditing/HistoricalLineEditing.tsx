@@ -2,7 +2,6 @@ import React from 'react';
 import './HistoricalLineEditing.css';
 import { HistoricalLineCardData } from '../../../types/historicalLines';
 import SideNavigation from '../SideNavigation/SideNavigation';
-import type { Region } from '../AddRegionsSection/AddRegionsSection';
 
 import GeneralInfoSection from '../GeneralInfoSection/GeneralInfoSection';
 import AddRegionsSection from '../AddRegionsSection/AddRegionsSection';
@@ -22,7 +21,7 @@ interface HistoricalLineEditingProps {
   handleCancelEdit: () => void;
   handleDeleteLine: () => void;
   handleMarkerChange: (file: File | null) => void;
-  handleAddRegion: (region: Region) => void;
+  handleAddRegion: (region: { title: string; id: number }) => void;
   onUpdateActiveRegions: (activeRegionIds: string[]) => void;
 }
 
@@ -75,7 +74,9 @@ const HistoricalLineEditing: React.FC<HistoricalLineEditingProps> = ({
       <CitiesListSection lineId={selectedLine?.id || null} />
     ),
     markers: (
-      <MarkersListSection />
+      <MarkersListSection 
+        selectedLine={selectedLine}
+      />
     ),
   };
 

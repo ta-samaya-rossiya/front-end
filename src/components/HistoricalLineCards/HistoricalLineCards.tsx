@@ -17,7 +17,7 @@ const HistoricalLineCards: React.FC<HistoricalLineCardsProps> = ({ historicalLin
     <div className="historical-line-cards">
       {/* Фильтрация линий по поисковому запросу и их отображение */}
       {historicalLines
-        .filter(line => line.title.toLowerCase().includes(searchTerm.toLowerCase()))
+        .filter(line => (line.title || '').toLowerCase().includes(searchTerm.toLowerCase()))
         .map(line => (
         <div key={line.id} className="historical-line-card">
           <h3>

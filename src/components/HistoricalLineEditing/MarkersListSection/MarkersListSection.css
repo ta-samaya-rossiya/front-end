@@ -15,4 +15,45 @@
   max-width: 100%;
   max-height: 100%;
   object-fit: contain;
+}
+
+.markers-list-section {
+  width: 100%;
+  padding: 20px;
+  background-color: #fff;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.markers-map-container {
+  position: relative;
+  margin-top: 20px;
+  height: 720px;
+  width: 1300px;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.save-marker-button {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  z-index: 1000;
+  padding: 8px 16px;
+  background-color: #4CAF50;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+  transition: background-color 0.3s;
+}
+
+.save-marker-button:hover {
+  background-color: #45a049;
+}
+
+.save-marker-button:disabled {
+  background-color: #cccccc;
+  cursor: not-allowed;
 } 

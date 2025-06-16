@@ -1,6 +1,6 @@
 // CitiesListSection.tsx
 // Этот компонент отвечает за отображение, добавление, изменение, удаление и изменение порядка исторических объектов (городов) для конкретной исторической линии.
-import React, { useState, useRef, useEffect, useCallback } from 'react';
+import React, { useState, useRef, useEffect, useCallback, useMemo } from 'react';
 import './CitiesListSection.css';
 import CityCard from './CityCard';
 import { historicalLines } from '@/api/historicalLines';
@@ -14,6 +14,28 @@ interface CitiesListSectionProps {
 // Вспомогательная функция для определения следующего порядка для нового города
 const getNextOrder = (cities: HistoricalObject[]) =>
   cities.length > 0 ? Math.max(...cities.map(c => c.order)) + 1 : 0;
+
+// Универсальная функция debounce
+type UpdateObjectFunction = (
+  currentLineId: string,
+  currentObjectId: string,
+  data: Partial<HistoricalObject>,
+  onErrorCallback: () => void
+) => Promise<void>;
+
+function debounce<Args extends Parameters<UpdateObjectFunction>>(
+  func: (...args: Args) => Promise<void>,
+  delay: number
+): (...args: Args) => void {
+  let timeoutId: ReturnType<typeof setTimeout>;
+
+  return function(...args: Args) {
+    clearTimeout(timeoutId);
+    timeoutId = setTimeout(() => {
+      func(...args);
+    }, delay);
+  };
+}
 
 const CitiesListSection: React.FC<CitiesListSectionProps> = ({ lineId }) => {
   // Состояние для хранения списка городов
@@ -67,20 +89,60 @@ const CitiesListSection: React.FC<CitiesListSectionProps> = ({ lineId }) => {
     const cityToUpdate = cities[idx];
     if (!cityToUpdate || !cityToUpdate.id) return;
 
-    // Оптимистичное обновление состояния UI
-    setCities(prev => prev.map((city, i) =>
-      i === idx ? { ...city, [field]: value } : city
-    ));
+    // Оптимистичное обновление состояния UI с учетом преобразования типов
+    const updatedCities = cities.map((city, i) => {
+      if (i === idx) {
+        let typedValue: string | number | [number, number] = value;
 
-    try {
-      // Обновление города на сервере
-      await historicalLines.updateObject(lineId, cityToUpdate.id, { [field]: value });
-    } catch (error) {
-      console.error(`Ошибка при обновлении поля ${field} города:`, error);
-      // Откат изменений в UI, если вызов API не удался
-      fetchAndSetCities(lineId);
-    }
+        if (field === 'order') {
+          typedValue = parseInt(value, 10);
+          if (isNaN(typedValue as number)) {
+            console.warn("Invalid order value, reverting to old:", value);
+            typedValue = cityToUpdate.order;
+          }
+        } else if (field === 'coords') {
+          const parts = value.split(',').map(s => parseFloat(s.trim()));
+          if (parts.length === 2 && !isNaN(parts[0]) && !isNaN(parts[1])) {
+            typedValue = [parts[0], parts[1]];
+          } else {
+            console.warn("Invalid coordinates format, reverting to old:", value);
+            typedValue = cityToUpdate.coords; // Revert to old if invalid format
+          }
+        }
+        return { ...city, [field]: typedValue };
+      }
+      return city;
+    });
+
+    setCities(updatedCities);
+
+    const updatedCity = updatedCities[idx]; // Получаем обновленный город из нового состояния
+
+    // Формируем данные для отправки на сервер со всеми необходимыми полями
+    const dataToSend: Partial<HistoricalObject> = {
+      title: updatedCity.title,
+      coords: updatedCity.coords,
+      order: updatedCity.order,
+      description: updatedCity.description,
+      videoUrl: updatedCity.videoUrl,
+    };
+
+    debouncedUpdateObject(lineId, updatedCity.id, dataToSend, () => fetchAndSetCities(lineId));
   };
+
+  // Debounced версия функции обновления объекта
+  const debouncedUpdateObject = useMemo(
+    () =>
+      debounce(async (currentLineId: string, currentObjectId: string, data: Partial<HistoricalObject>, onErrorCallback: () => void) => {
+        try {
+          await historicalLines.updateObject(currentLineId, currentObjectId, data);
+        } catch (error) {
+          console.error(`Ошибка при обновлении поля города:`, error);
+          onErrorCallback(); // Откат изменений в UI, если вызов API не удался
+        }
+      }, 500), // Задержка 500 мс
+    [] // Зависимости нет, функция создается один раз
+  );
 
   // Обработчик удаления города
   const handleRemove = async (idx: number) => {
@@ -126,21 +188,37 @@ const CitiesListSection: React.FC<CitiesListSectionProps> = ({ lineId }) => {
     setCities(updatedCitiesWithOrder); // Оптимистичное обновление UI
 
     try {
-      // Обновление порядка двух перемещенных городов на сервере
       const updates = [];
+      // Обновляем оба перемещенных города, отправляя полный объект
       const city1 = updatedCitiesWithOrder[idx];
       const city2 = updatedCitiesWithOrder[targetIdx];
 
       if (city1 && city1.id) {
-        updates.push(historicalLines.updateObject(lineId, city1.id, { order: city1.order }));
+        // Формируем полный объект для отправки
+        const dataToSend1: Partial<HistoricalObject> = {
+          title: city1.title,
+          coords: city1.coords,
+          order: city1.order,
+          description: city1.description,
+          videoUrl: city1.videoUrl,
+        };
+        console.log("handleMove: Sending data for city1", dataToSend1);
+        updates.push(historicalLines.updateObject(lineId, city1.id, dataToSend1));
       }
       if (city2 && city2.id) {
-        updates.push(historicalLines.updateObject(lineId, city2.id, { order: city2.order }));
+        // Формируем полный объект для отправки
+        const dataToSend2: Partial<HistoricalObject> = {
+          title: city2.title,
+          coords: city2.coords,
+          order: city2.order,
+          description: city2.description,
+          videoUrl: city2.videoUrl,
+        };
+        console.log("handleMove: Sending data for city2", dataToSend2);
+        updates.push(historicalLines.updateObject(lineId, city2.id, dataToSend2));
       }
       
       await Promise.all(updates); // Ожидание выполнения всех запросов на обновление
-      // Повторная загрузка для обеспечения согласованности состояний клиента и сервера
-      fetchAndSetCities(lineId);
     } catch (error) {
       console.error('Ошибка при перемещении города:', error);
       // Откат изменений в UI, если вызов API не удался
@@ -190,17 +268,25 @@ const CitiesListSection: React.FC<CitiesListSectionProps> = ({ lineId }) => {
 
     try {
         const updates = [];
-        // Отправляем обновления только для городов, порядок которых изменился.
-        // Находим соответствующий исходный город по id для сравнения порядка.
+        // Отправляем обновления для всех городов, порядок которых изменился
         for (let i = 0; i < updatedCitiesWithOrder.length; i++) {
-          const originalCity = cities.find(c => c.id === updatedCitiesWithOrder[i].id);
-          if (originalCity && originalCity.order !== updatedCitiesWithOrder[i].order) {
-            updates.push(historicalLines.updateObject(lineId, updatedCitiesWithOrder[i].id, { order: updatedCitiesWithOrder[i].order }));
+          const currentCity = updatedCitiesWithOrder[i];
+          const originalCity = cities.find(c => c.id === currentCity.id);
+          
+          if (originalCity && originalCity.order !== currentCity.order) {
+            // Формируем полный объект для отправки
+            const dataToSend: Partial<HistoricalObject> = {
+              title: currentCity.title,
+              coords: currentCity.coords,
+              order: currentCity.order,
+              description: currentCity.description,
+              videoUrl: currentCity.videoUrl,
+            };
+            console.log("handleDrop: Sending data for currentCity", dataToSend);
+            updates.push(historicalLines.updateObject(lineId, currentCity.id, dataToSend));
           }
         }
         await Promise.all(updates); // Ожидание выполнения всех запросов на обновление
-        // Повторная загрузка для обеспечения согласованности состояний клиента и сервера
-        fetchAndSetCities(lineId);
     } catch (error) {
       console.error('Ошибка при обновлении порядка городов:', error);
       // Откат изменений в UI, если вызов API не удался
